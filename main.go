@@ -3,7 +3,16 @@ package goGetMyIP
 import (
 	"io"
 	"net/http"
+	"strings"
 )
+
+var defaultAPIEndpoints = []string{
+	"https://api.ipify.org",
+	"http://myexternalip.com/raw",
+	"https://ipinfo.io/ip",
+	"https://icanhazip.com",
+	"https://www.trackip.net/ip",
+}
 
 // IPGetter handles getting the IP from a list of API endpoints.
 type IPGetter struct {
@@ -15,11 +24,7 @@ type IPGetter struct {
 func NewIPGetter() *IPGetter {
 	return NewIPGetterWith(
 		//some default API endpoints that I've used before
-		[]string{
-			"https://api.ipify.org",
-			"http://myexternalip.com/raw",
-			// "http://api.ident.me",
-		},
+		defaultAPIEndpoints,
 	)
 }
 
@@ -36,6 +41,8 @@ func NewIPGetterWith(apis []string) *IPGetter {
 // only really needed if you really want to get all of your processing out of the way at the launch of the program.
 func (ipg *IPGetter) CacheIP() {
 	cacheChan := make(chan string)
+
+	//start several API calls at once in their own go routines, each successful attempt submitting their answer to cacheChan. First result is the one that maters, and is set as the cached IP.
 	for _, api := range ipg.apiPoints {
 		go func(api string) {
 			resp, err := http.Get(api)
@@ -51,7 +58,11 @@ func (ipg *IPGetter) CacheIP() {
 
 		}(api)
 	}
-	ipg.ipString = <-cacheChan
+	s := <-cacheChan
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, " ", "")
+	s = strings.ReplaceAll(s, "\t", "")
+	ipg.ipString = s
 }
 
 // get the IP as a string. checks to see if it already has been cached before calling APIs

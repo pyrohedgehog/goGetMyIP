@@ -7,14 +7,9 @@ import (
 )
 
 func TestIPGetter(t *testing.T) {
-	apis := []string{
-		"https://api.ipify.org",
-		"http://myexternalip.com/raw",
-		// "http://api.ident.me",
-	}
 	//setup a getter for each default endpoint, then cache our IP
 	ips := []string{}
-	for _, api := range apis {
+	for _, api := range defaultAPIEndpoints {
 		ipg := NewIPGetterWith([]string{api})
 		ips = append(ips, ipg.GetIPString())
 	}
