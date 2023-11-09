@@ -19,6 +19,7 @@ func TestIPGetter(t *testing.T) {
 		ips = append(ips, ipg.GetIPString())
 	}
 	ips = append(ips, NewIPGetter().GetIPString())
+	ips = append(ips, GetExternalIP())
 	for i := 1; i < len(ips); i++ {
 		assert.Equal(t,
 			ips[i], ips[i-1],

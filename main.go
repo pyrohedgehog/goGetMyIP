@@ -61,3 +61,8 @@ func (ipg *IPGetter) GetIPString() string {
 	}
 	return ipg.ipString
 }
+
+// gets the external IP of this device. Most suitable for 99% of use cases.
+func GetExternalIP() string {
+	return NewIPGetter().GetIPString()
+}
